@@ -37,9 +37,16 @@ export default function SignInForm() {
         email: data.email,
         password: data.password,
       });
-
       if (response.error) {
-        throw response.error;
+        // Provide more specific error messages for common auth issues
+        if (response.error.message.includes("Invalid login credentials")) {
+          setError("Invalid email or password. Please try again.");
+        } else if (response.error.message.includes("Email not confirmed")) {
+          setError("Please verify your email before signing in.");
+        } else {
+          throw response.error;
+        }
+        return;
       }
 
       // Simple redirect - no extra session check

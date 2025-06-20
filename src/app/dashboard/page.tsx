@@ -48,18 +48,17 @@ export default async function DashboardPage() {
     <div className="container mx-auto py-8">
       <h1 className="mb-6 text-3xl font-bold">
         Welcome, {userProfile?.first_name || "Guest"}!
-      </h1>
-
+      </h1>{" "}
       <div className="grid gap-6 md:grid-cols-2">
-        <div className="bg-gray-500 p-6 rounded-lg border border-gray-200">
-          <h2 className="text-xl font-semibold mb-4">Your Profile</h2>{" "}
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+          <h2 className="text-xl font-semibold mb-4">Your Profile</h2>
           <div className="space-y-2">
             {userProfile ? (
               <>
                 <p>
                   <strong>Name:</strong> {userProfile.first_name}{" "}
                   {userProfile.last_name}
-                </p>{" "}
+                </p>
                 <p>
                   <strong>Email:</strong> {data?.user?.email || "Not available"}
                 </p>
@@ -71,8 +70,8 @@ export default async function DashboardPage() {
               <p>Sign in to view your profile information</p>
             )}
           </div>
-        </div>{" "}
-        <div className="bg-gray-500 p-6 rounded-lg border border-gray-200">
+        </div>
+        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
           <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
           <div className="space-y-2">
             <p>
@@ -80,12 +79,12 @@ export default async function DashboardPage() {
               components you need.
             </p>
           </div>
-        </div>
+        </div>{" "}
         {/* Debug information panel - only visible in development */}
         {process.env.NODE_ENV === "development" && (
-          <div className="bg-gray-500 p-6 rounded-lg border border-gray-200">
-            <h2 className="text-xl font-semibold mb-4">Session Debug</h2>{" "}
-            <div className="space-y-2 text-xs font-mono overflow-auto max-h-60">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+            <h2 className="text-xl font-semibold mb-4">Session Debug</h2>
+            <div className="space-y-2 text-xs font-mono overflow-auto max-h-60 bg-gray-100 dark:bg-gray-900 p-3 rounded">
               <div>
                 <strong>Session exists:</strong> {data?.user ? "Yes" : "No"}
               </div>
