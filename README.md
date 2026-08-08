@@ -2,6 +2,9 @@
 
 A simple Next.js template project with authentication support using Supabase.
 
+See [DESIGN.md](./DESIGN.md) for the portfolio's shared design language —
+read that before styling a new or revamped project.
+
 ## Features
 
 - Next.js 13+ with App Router
