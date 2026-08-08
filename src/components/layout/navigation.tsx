@@ -27,19 +27,17 @@ export default function Navigation() {
 
     checkUser();
 
-    // Subscribe to auth changes
+    // Subscribe to auth changes — this listener's only job is keeping the
+    // rendered nav (signed-in vs signed-out links) in sync with auth
+    // state. It used to also hard-reload to /dashboard on SIGNED_IN, but
+    // that fires again every time this component mounts (Supabase fires
+    // an initial event on subscribe even when already signed in) — so on
+    // /dashboard itself that was a self-reloading loop: reload -> this
+    // effect re-runs -> fires again -> reload again. Navigation belongs
+    // to the sign-in/sign-up forms (see signin-form.tsx), not here.
     const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (event: string, session: Session | null) => {
-        const sessionUser = session?.user || null;
-        setUser(sessionUser);
-
-        // If user just signed in, redirect to dashboard
-        if (event === "SIGNED_IN" && sessionUser) {
-          console.log(
-            "Auth state change: signed in, redirecting to dashboard..."
-          );
-          window.location.href = "/dashboard";
-        }
+      async (_event: string, session: Session | null) => {
+        setUser(session?.user || null);
       }
     );
     return () => {
