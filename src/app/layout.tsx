@@ -1,8 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Link from "next/link";
 import "./globals.css";
-import Navigation from "@/components/layout/navigation";
 import { SupabaseListener } from "@/components/supabase-listener";
 import { ThemeProvider } from "@/components/theme/theme-provider";
 
@@ -35,20 +33,10 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased dark:bg-gray-900 dark:text-white`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased flex min-h-screen flex-col`}
       >
         <ThemeProvider>
-          <SupabaseListener>
-            <header className="border-b border-gray-200 dark:border-gray-800">
-              <div className="container mx-auto flex items-center justify-between p-4">
-                <Link href="/" className="text-xl font-bold">
-                  Template
-                </Link>
-                <Navigation />
-              </div>
-            </header>
-            <main className="container mx-auto p-4">{children}</main>
-          </SupabaseListener>
+          <SupabaseListener>{children}</SupabaseListener>
         </ThemeProvider>
       </body>
     </html>

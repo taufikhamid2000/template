@@ -49,7 +49,7 @@ describe("Authentication Flow", () => {
     await user.type(screen.getByLabelText(/First Name/i), testUser.firstName);
     await user.type(screen.getByLabelText(/Last Name/i), testUser.lastName);
     await user.type(screen.getByLabelText(/Email/i), testUser.email);
-    await user.type(screen.getByLabelText(/Password/i), testUser.password);
+    await user.type(screen.getByLabelText("Password"), testUser.password);
     await user.click(screen.getByRole("button", { name: /Sign up/i }));
 
     // Verify signup was called with correct data
@@ -78,7 +78,7 @@ describe("Authentication Flow", () => {
     render(<SignInForm />);
 
     await user.type(screen.getByLabelText(/Email/i), testUser.email);
-    await user.type(screen.getByLabelText(/Password/i), testUser.password);
+    await user.type(screen.getByLabelText("Password"), testUser.password);
     await user.click(screen.getByRole("button", { name: /Sign in/i }));
 
     // Verify login was called with correct data

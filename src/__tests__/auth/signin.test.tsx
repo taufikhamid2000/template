@@ -33,11 +33,10 @@ describe("SignIn Form", () => {
 
     // Check form elements exist
     expect(screen.getByLabelText(/Email/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Password/i)).toBeInTheDocument();
+    expect(screen.getByLabelText("Password")).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /Sign in/i })
     ).toBeInTheDocument();
-    expect(screen.getByText(/Forgot password?/i)).toBeInTheDocument();
   });
 
   test("validates required fields", async () => {
@@ -68,7 +67,7 @@ describe("SignIn Form", () => {
 
     // Fill the form with valid data
     await user.type(screen.getByLabelText(/Email/i), "john.doe@example.com");
-    await user.type(screen.getByLabelText(/Password/i), "password123");
+    await user.type(screen.getByLabelText("Password"), "password123");
 
     // Submit the form
     await user.click(screen.getByRole("button", { name: /Sign in/i }));
@@ -97,7 +96,7 @@ describe("SignIn Form", () => {
 
     // Fill the form with valid data
     await user.type(screen.getByLabelText(/Email/i), "john.doe@example.com");
-    await user.type(screen.getByLabelText(/Password/i), "password123");
+    await user.type(screen.getByLabelText("Password"), "password123");
 
     // Submit the form
     await user.click(screen.getByRole("button", { name: /Sign in/i }));

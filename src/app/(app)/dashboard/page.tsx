@@ -45,13 +45,13 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="container mx-auto py-8">
-      <h1 className="mb-6 text-3xl font-bold">
+    <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-6 px-6 py-12 animate-page-in">
+      <h1 className="text-xl font-semibold text-foreground">
         Welcome, {userProfile?.first_name || "Guest"}!
       </h1>{" "}
       <div className="grid gap-6 md:grid-cols-2">
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-          <h2 className="text-xl font-semibold mb-4">Your Profile</h2>
+        <div className="rounded-2xl border border-border bg-muted/40 p-6">
+          <h2 className="text-sm font-medium text-foreground/60 mb-4">Your Profile</h2>
           <div className="space-y-2">
             {userProfile ? (
               <>
@@ -71,8 +71,8 @@ export default async function DashboardPage() {
             )}
           </div>
         </div>
-        <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-          <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
+        <div className="rounded-2xl border border-border bg-muted/40 p-6">
+          <h2 className="text-sm font-medium text-foreground/60 mb-4">Quick Actions</h2>
           <div className="space-y-2">
             <p>
               This is your personal dashboard. You can customize it with the
@@ -82,9 +82,9 @@ export default async function DashboardPage() {
         </div>{" "}
         {/* Debug information panel - only visible in development */}
         {process.env.NODE_ENV === "development" && (
-          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
-            <h2 className="text-xl font-semibold mb-4">Session Debug</h2>
-            <div className="space-y-2 text-xs font-mono overflow-auto max-h-60 bg-gray-100 dark:bg-gray-900 p-3 rounded">
+          <div className="rounded-2xl border border-border bg-muted/40 p-6">
+            <h2 className="text-sm font-medium text-foreground/60 mb-4">Session Debug</h2>
+            <div className="space-y-2 text-xs font-mono overflow-auto max-h-60 bg-muted p-3 rounded-lg border border-border">
               <div>
                 <strong>Session exists:</strong> {data?.user ? "Yes" : "No"}
               </div>
