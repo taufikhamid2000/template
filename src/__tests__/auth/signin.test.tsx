@@ -2,7 +2,6 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import SignInForm from "@/app/auth/signin/components/signin-form";
-import { supabase } from "@/lib/supabase/client";
 
 // Mock the next/navigation hooks
 const pushMock = jest.fn();
@@ -15,13 +14,12 @@ jest.mock("next/navigation", () => ({
   }),
 }));
 
-// Mock the supabase client
-jest.mock("@/lib/supabase/client", () => ({
-  supabase: {
-    auth: {
-      signInWithPassword: jest.fn(),
-    },
-  },
+// Mock the supabase client actually used by signin-form.tsx
+const signInWithPassword = jest.fn();
+jest.mock("@/utils/supabase/client", () => ({
+  createClient: () => ({
+    auth: { signInWithPassword },
+  }),
 }));
 
 describe("SignIn Form", () => {
@@ -62,9 +60,7 @@ describe("SignIn Form", () => {
   });
   test("submits the form with valid data and redirects on success", async () => {
     // Mock the successful sign in response
-    (supabase.auth.signInWithPassword as jest.Mock).mockResolvedValueOnce({
-      error: null,
-    });
+    signInWithPassword.mockResolvedValueOnce({ error: null });
 
     render(<SignInForm />);
 
@@ -79,7 +75,7 @@ describe("SignIn Form", () => {
 
     // Verify supabase.auth.signInWithPassword was called with the right data
     await waitFor(() => {
-      expect(supabase.auth.signInWithPassword).toHaveBeenCalledWith({
+      expect(signInWithPassword).toHaveBeenCalledWith({
         email: "john.doe@example.com",
         password: "password123",
       });
@@ -91,7 +87,7 @@ describe("SignIn Form", () => {
   });
   test("displays an error message when signin fails", async () => {
     // Mock a failed sign in response
-    (supabase.auth.signInWithPassword as jest.Mock).mockResolvedValueOnce({
+    signInWithPassword.mockResolvedValueOnce({
       error: { message: "Invalid login credentials" },
     });
 
@@ -106,9 +102,12 @@ describe("SignIn Form", () => {
     // Submit the form
     await user.click(screen.getByRole("button", { name: /Sign in/i }));
 
-    // Check if error message is displayed
+    // Check if error message is displayed — the form remaps Supabase's raw
+    // "Invalid login credentials" into this friendlier copy
     await waitFor(() => {
-      expect(screen.getByText("Invalid login credentials")).toBeInTheDocument();
+      expect(
+        screen.getByText("Invalid email or password. Please try again.")
+      ).toBeInTheDocument();
     });
   });
 });

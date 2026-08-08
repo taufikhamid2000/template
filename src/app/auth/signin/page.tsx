@@ -11,7 +11,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import SignInForm from "./components/signin-form";
-import { createServerClient } from "@/lib/supabase/server";
+import { createServerClient } from "@/utils/supabase/server";
 
 export const metadata: Metadata = {
   title: "Sign In - Template",

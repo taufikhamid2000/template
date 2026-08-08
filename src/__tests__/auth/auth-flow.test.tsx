@@ -2,16 +2,13 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 
-// Mock the supabase client
-jest.mock("@/lib/supabase/client", () => ({
-  supabase: {
-    auth: {
-      getSession: jest.fn(),
-      signUp: jest.fn(),
-      signInWithPassword: jest.fn(),
-      signOut: jest.fn(),
-    },
-  },
+// Mock the supabase client actually used by both forms
+const signUp = jest.fn();
+const signInWithPassword = jest.fn();
+jest.mock("@/utils/supabase/client", () => ({
+  createClient: () => ({
+    auth: { signUp, signInWithPassword },
+  }),
 }));
 
 // Mock next/navigation
@@ -26,7 +23,6 @@ jest.mock("next/navigation", () => ({
 // Import components after mocks
 import SignUpForm from "@/app/auth/signup/components/signup-form";
 import SignInForm from "@/app/auth/signin/components/signin-form";
-import { supabase } from "@/lib/supabase/client";
 
 describe("Authentication Flow", () => {
   beforeEach(() => {
@@ -42,8 +38,9 @@ describe("Authentication Flow", () => {
       password: "password123",
     };
 
-    // Step 2: Mock successful signup
-    (supabase.auth.signUp as jest.Mock).mockResolvedValueOnce({ error: null });
+    // Step 2: Mock successful signup (signup-form also immediately signs in)
+    signUp.mockResolvedValueOnce({ error: null });
+    signInWithPassword.mockResolvedValueOnce({ error: null });
 
     // Step 3: Render signup form and fill it out
     const { unmount } = render(<SignUpForm />);
@@ -57,7 +54,7 @@ describe("Authentication Flow", () => {
 
     // Verify signup was called with correct data
     await waitFor(() => {
-      expect(supabase.auth.signUp).toHaveBeenCalledWith({
+      expect(signUp).toHaveBeenCalledWith({
         email: testUser.email,
         password: testUser.password,
         options: {
@@ -66,6 +63,7 @@ describe("Authentication Flow", () => {
             last_name: testUser.lastName,
             role: "user",
           },
+          emailRedirectTo: `${process.env.NEXT_PUBLIC_REDIRECT_URL}/dashboard`,
         },
       });
     });
@@ -73,10 +71,8 @@ describe("Authentication Flow", () => {
     // Step 4: Clean up signup component
     unmount();
 
-    // Step 5: Mock successful login
-    (supabase.auth.signInWithPassword as jest.Mock).mockResolvedValueOnce({
-      error: null,
-    });
+    // Step 5: Mock successful login (separately from signup's own call)
+    signInWithPassword.mockResolvedValueOnce({ error: null });
 
     // Step 6: Render login form and fill it out
     render(<SignInForm />);
@@ -87,7 +83,7 @@ describe("Authentication Flow", () => {
 
     // Verify login was called with correct data
     await waitFor(() => {
-      expect(supabase.auth.signInWithPassword).toHaveBeenCalledWith({
+      expect(signInWithPassword).toHaveBeenCalledWith({
         email: testUser.email,
         password: testUser.password,
       });

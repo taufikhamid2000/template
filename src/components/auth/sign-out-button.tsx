@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/utils/supabase/client";
 
@@ -21,6 +22,7 @@ export default function SignOutButton({
   variant = "ghost",
   className = "hover:text-blue-600",
 }: SignOutButtonProps) {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSignOut = async () => {
@@ -29,8 +31,10 @@ export default function SignOutButton({
       const supabase = createClient();
       await supabase.auth.signOut();
 
-      // Use direct navigation to ensure a full page refresh
-      window.location.href = redirectTo;
+      // Same reasoning as signin-form.tsx: a hard reload here would race
+      // SupabaseListener's own SIGNED_OUT-triggered refresh.
+      router.refresh();
+      router.push(redirectTo);
     } catch (error) {
       console.error("Error signing out:", error);
     } finally {

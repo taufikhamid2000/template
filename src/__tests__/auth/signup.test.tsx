@@ -2,7 +2,6 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import SignUpForm from "@/app/auth/signup/components/signup-form";
-import { supabase } from "@/lib/supabase/client";
 
 // Mock the next/navigation hooks
 const pushMock = jest.fn();
@@ -15,13 +14,13 @@ jest.mock("next/navigation", () => ({
   }),
 }));
 
-// Mock the supabase client
-jest.mock("@/lib/supabase/client", () => ({
-  supabase: {
-    auth: {
-      signUp: jest.fn(),
-    },
-  },
+// Mock the supabase client actually used by signup-form.tsx
+const signUp = jest.fn();
+const signInWithPassword = jest.fn();
+jest.mock("@/utils/supabase/client", () => ({
+  createClient: () => ({
+    auth: { signUp, signInWithPassword },
+  }),
 }));
 
 describe("SignUp Form", () => {
@@ -68,8 +67,9 @@ describe("SignUp Form", () => {
     });
   });
   test("submits the form with valid data", async () => {
-    // Mock the successful sign up response
-    (supabase.auth.signUp as jest.Mock).mockResolvedValueOnce({ error: null });
+    // Mock the successful sign up + immediate sign in response
+    signUp.mockResolvedValueOnce({ error: null });
+    signInWithPassword.mockResolvedValueOnce({ error: null });
 
     render(<SignUpForm />);
 
@@ -86,7 +86,7 @@ describe("SignUp Form", () => {
 
     // Verify supabase.auth.signUp was called with the right data
     await waitFor(() => {
-      expect(supabase.auth.signUp).toHaveBeenCalledWith({
+      expect(signUp).toHaveBeenCalledWith({
         email: "john.doe@example.com",
         password: "password123",
         options: {
@@ -95,17 +95,22 @@ describe("SignUp Form", () => {
             last_name: "Doe",
             role: "user",
           },
+          emailRedirectTo: `${process.env.NEXT_PUBLIC_REDIRECT_URL}/dashboard`,
         },
       });
-    }); // Verify we're redirected to dashboard (not verification)
+    }); // Verify signup also signs the user in and redirects to dashboard
     await waitFor(() => {
-      // Test for window.location.href instead of pushMock since we're using direct navigation
-      expect(window.location.href).toBe("/dashboard");
+      expect(signInWithPassword).toHaveBeenCalledWith({
+        email: "john.doe@example.com",
+        password: "password123",
+      });
+      expect(refreshMock).toHaveBeenCalled();
+      expect(pushMock).toHaveBeenCalledWith("/dashboard");
     });
   });
   test("displays an error message when signup fails", async () => {
     // Mock a failed sign up response
-    (supabase.auth.signUp as jest.Mock).mockResolvedValueOnce({
+    signUp.mockResolvedValueOnce({
       error: { message: "This email is already registered" },
     });
 

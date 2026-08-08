@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -17,6 +18,7 @@ const SignInSchema = z.object({
 type SignInFormValues = z.infer<typeof SignInSchema>;
 
 export default function SignInForm() {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -49,8 +51,14 @@ export default function SignInForm() {
         return;
       }
 
-      // Simple redirect - no extra session check
-      window.location.href = "/dashboard";
+      // A hard window.location.href reload here used to race the
+      // SupabaseListener's own post-sign-in refresh (both firing off the
+      // same signInWithPassword call), which is what produced the
+      // double-reload flash. router.refresh() invalidates the client
+      // router cache so /dashboard's server check sees the just-set
+      // session cookie, then router.push does a normal soft navigation.
+      router.refresh();
+      router.push("/dashboard");
     } catch (err) {
       const error = err as { message?: string };
       setError(error.message || "An error occurred during sign in");

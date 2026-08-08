@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -23,6 +24,7 @@ const SignUpSchema = z.object({
 type SignUpFormValues = z.infer<typeof SignUpSchema>;
 
 export default function SignUpForm() {
+  const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -65,8 +67,10 @@ export default function SignUpForm() {
         throw signInError;
       }
 
-      // Success - go directly to dashboard, no verification required
-      window.location.href = "/dashboard";
+      // Success - go directly to dashboard, no verification required.
+      // See signin-form.tsx for why this isn't window.location.href.
+      router.refresh();
+      router.push("/dashboard");
     } catch (err) {
       const error = err as { message?: string };
       setError(error.message || "An error occurred during sign up");
