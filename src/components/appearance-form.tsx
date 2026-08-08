@@ -7,21 +7,7 @@ import { THEMES, type Theme } from "@/lib/theme";
 import { ACCENTS, type AccentId } from "@/lib/accent";
 import { Tooltip } from "@/components/tooltip";
 import { CustomAccentPicker } from "@/components/custom-accent-picker";
-
-const THEME_LABEL: Record<Theme, string> = {
-  light: "Light",
-  dark: "Dark",
-  system: "System",
-};
-
-const ACCENT_LABEL: Record<AccentId, string> = {
-  default: "Default",
-  ocean: "Ocean",
-  forest: "Forest",
-  plum: "Plum",
-  slate: "Slate",
-  custom: "Custom",
-};
+import type { Dictionary } from "@/lib/dictionaries/en";
 
 // Selecting a theme/accent previously saved (and redirected) on every
 // click, which made each pick feel like a slow round trip. Now every click
@@ -54,11 +40,13 @@ export function AppearanceForm({
   initialAccent,
   initialCustomBg,
   initialCustomFg,
+  dict,
 }: {
   initialTheme: Theme;
   initialAccent: AccentId;
   initialCustomBg: string;
   initialCustomFg: string;
+  dict: Dictionary["settings"];
 }) {
   const [savedTheme, setSavedTheme] = useState(initialTheme);
   const [savedAccent, setSavedAccent] = useState(initialAccent);
@@ -81,6 +69,21 @@ export function AppearanceForm({
     accent !== savedAccent ||
     (accent === "custom" && (customBg !== savedCustomBg || customFg !== savedCustomFg));
 
+  const THEME_LABEL: Record<Theme, string> = {
+    light: dict.themeLight,
+    dark: dict.themeDark,
+    system: dict.themeSystem,
+  };
+
+  const ACCENT_LABEL: Record<AccentId, string> = {
+    default: dict.accentDefault,
+    ocean: dict.accentOcean,
+    forest: dict.accentForest,
+    plum: dict.accentPlum,
+    slate: dict.accentSlate,
+    custom: dict.accentCustom,
+  };
+
   function handleSave() {
     startTransition(async () => {
       await setTheme(theme);
@@ -102,7 +105,7 @@ export function AppearanceForm({
   return (
     <>
       <section className="flex flex-col gap-3">
-        <h2 className="text-sm font-medium text-foreground/60">Theme</h2>
+        <h2 className="text-sm font-medium text-foreground/60">{dict.theme}</h2>
         <div className="flex gap-2">
           {THEMES.map((t) => (
             <button
@@ -124,8 +127,8 @@ export function AppearanceForm({
 
       <section className="flex flex-col gap-3">
         <div className="flex items-center gap-1.5">
-          <h2 className="text-sm font-medium text-foreground/60">Accent</h2>
-          <Tooltip label="Recolors the header and sidebar. Page content stays the same regardless of which accent is picked." />
+          <h2 className="text-sm font-medium text-foreground/60">{dict.accent}</h2>
+          <Tooltip label={dict.accentTooltip} />
         </div>
         <div className="flex flex-wrap items-center gap-3">
           {ACCENTS.map((a) => (
@@ -148,20 +151,26 @@ export function AppearanceForm({
         </div>
 
         {accent === "custom" && (
-          <CustomAccentPicker bg={customBg} fg={customFg} onBgChange={setCustomBg} onFgChange={setCustomFg} />
+          <CustomAccentPicker
+            bg={customBg}
+            fg={customFg}
+            onBgChange={setCustomBg}
+            onFgChange={setCustomFg}
+            dict={dict}
+          />
         )}
       </section>
 
       {dirty && (
         <div className="flex items-center gap-3 rounded-2xl border border-border bg-muted/40 p-3">
-          <p className="flex-1 text-xs text-foreground/60">You have unsaved appearance changes.</p>
+          <p className="flex-1 text-xs text-foreground/60">{dict.unsavedAppearanceChanges}</p>
           <button
             type="button"
             onClick={handleDiscard}
             disabled={isPending}
             className="cursor-pointer rounded-full border border-border px-4 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:opacity-50"
           >
-            Cancel
+            {dict.cancel}
           </button>
           <button
             type="button"
@@ -169,7 +178,7 @@ export function AppearanceForm({
             disabled={isPending}
             className="cursor-pointer rounded-full bg-primary px-4 py-1.5 text-xs font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:opacity-50"
           >
-            {isPending ? "Saving…" : "Save"}
+            {isPending ? dict.saving : dict.save}
           </button>
         </div>
       )}

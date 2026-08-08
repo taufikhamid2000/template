@@ -4,11 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import SignOutButton from "@/components/auth/sign-out-button";
+import type { Dictionary } from "@/lib/dictionaries/en";
 
-const NAV_LINKS = [
-  { href: "/dashboard", label: "Dashboard" },
-  { href: "/settings", label: "Settings" },
-];
+type NavDict = Dictionary["nav"];
 
 // Full-width top bar (brand far left, sign-out far right) sits above
 // everything else; the nav links live in a sidebar below it — a static
@@ -16,9 +14,14 @@ const NAV_LINKS = [
 // hamburger) below that. Only wraps the authenticated (app) route group —
 // the public home page and auth pages render their own minimal chrome
 // instead, same split DuitDuit uses between its AppShell and /login.
-export function AppShell({ children }: { children: React.ReactNode }) {
+export function AppShell({ nav, children }: { nav: NavDict; children: React.ReactNode }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+
+  const navLinks = [
+    { href: "/dashboard", label: nav.dashboard },
+    { href: "/settings", label: nav.settings },
+  ];
 
   useEffect(() => {
     if (!open) return;
@@ -44,7 +47,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           <button
             type="button"
             aria-expanded={open}
-            aria-label={open ? "Close menu" : "Open menu"}
+            aria-label={open ? nav.closeMenu : nav.openMenu}
             onClick={() => setOpen((o) => !o)}
             className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-lg text-[var(--nav-fg-muted)] transition-colors hover:bg-[var(--nav-hover-bg)] hover:text-[var(--nav-fg)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring md:hidden"
           >
@@ -60,13 +63,15 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             )}
           </button>
           <Link href="/dashboard" className="text-sm font-semibold text-[var(--nav-fg)]">
-            Template
+            {nav.brand}
           </Link>
         </div>
 
         <SignOutButton
           variant="ghost"
           className="cursor-pointer text-sm text-[var(--nav-fg-muted)] underline-offset-4 transition-colors hover:text-destructive hover:underline"
+          label={nav.signOut}
+          pendingLabel={nav.signingOut}
         />
       </header>
 
@@ -82,20 +87,20 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <aside
           role="dialog"
           aria-modal="true"
-          aria-label="Template"
+          aria-label={nav.brand}
           className={`fixed top-14 bottom-0 left-0 z-30 flex w-64 flex-col border-r border-[var(--nav-border)] bg-[var(--nav-bg)] px-4 py-4 shadow-xl transition-transform duration-200 md:hidden ${
             open ? "translate-x-0" : "-translate-x-full"
           }`}
         >
           <nav className="flex flex-1 flex-col gap-1">
-            <NavLinks pathname={pathname} onNavigate={() => setOpen(false)} />
+            <NavLinks links={navLinks} pathname={pathname} onNavigate={() => setOpen(false)} />
           </nav>
         </aside>
 
         {/* Desktop sidebar */}
         <aside className="sticky top-14 hidden h-[calc(100vh-3.5rem)] w-56 shrink-0 flex-col border-r border-[var(--nav-border)] bg-[var(--nav-bg)] px-4 py-6 md:flex">
           <nav className="flex flex-1 flex-col gap-1">
-            <NavLinks pathname={pathname} />
+            <NavLinks links={navLinks} pathname={pathname} />
           </nav>
         </aside>
 
@@ -105,10 +110,18 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   );
 }
 
-function NavLinks({ pathname, onNavigate }: { pathname: string; onNavigate?: () => void }) {
+function NavLinks({
+  links,
+  pathname,
+  onNavigate,
+}: {
+  links: { href: string; label: string }[];
+  pathname: string;
+  onNavigate?: () => void;
+}) {
   return (
     <>
-      {NAV_LINKS.map((link) => {
+      {links.map((link) => {
         const isActive = pathname === link.href;
         return (
           <Link

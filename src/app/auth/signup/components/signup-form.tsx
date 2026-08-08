@@ -9,29 +9,29 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { createClient } from "@/utils/supabase/client";
 import { PasswordInput } from "@/components/password-input";
 import { Spinner } from "@/components/spinner";
+import type { Dictionary } from "@/lib/dictionaries/en";
 
-const SignUpSchema = z.object({
-  firstName: z
-    .string()
-    .min(2, { message: "First name must be at least 2 characters" }),
-  lastName: z
-    .string()
-    .min(2, { message: "Last name must be at least 2 characters" }),
-  email: z.string().email({ message: "Please enter a valid email" }),
-  password: z
-    .string()
-    .min(6, { message: "Password must be at least 6 characters" }),
-});
-
-type SignUpFormValues = z.infer<typeof SignUpSchema>;
+type SignUpFormValues = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+};
 
 const FIELD_CLASS =
   "rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring";
 
-export default function SignUpForm() {
+export default function SignUpForm({ dict }: { dict: Dictionary }) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const SignUpSchema = z.object({
+    firstName: z.string().min(2, { message: dict.validation.firstNameMin }),
+    lastName: z.string().min(2, { message: dict.validation.lastNameMin }),
+    email: z.string().email({ message: dict.validation.emailInvalid }),
+    password: z.string().min(6, { message: dict.validation.passwordMin }),
+  });
 
   const {
     register,
@@ -78,7 +78,7 @@ export default function SignUpForm() {
       router.push("/dashboard");
     } catch (err) {
       const error = err as { message?: string };
-      setError(error.message || "An error occurred during sign up");
+      setError(error.message || dict.signup.genericError);
     } finally {
       setIsLoading(false);
     }
@@ -87,8 +87,8 @@ export default function SignUpForm() {
   return (
     <div className="flex flex-1 items-center justify-center bg-muted px-4">
       <div className="w-full max-w-sm rounded-2xl border border-border bg-background p-8 animate-page-in">
-        <h1 className="text-xl font-semibold text-foreground">Create an account</h1>
-        <p className="mb-6 text-sm text-foreground/60">Get started with Template</p>
+        <h1 className="text-xl font-semibold text-foreground">{dict.signup.createAccount}</h1>
+        <p className="mb-6 text-sm text-foreground/60">{dict.signup.subtitle}</p>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-3">
           {error && <p className="text-sm text-destructive">{error}</p>}
@@ -98,8 +98,8 @@ export default function SignUpForm() {
               <input
                 {...register("firstName")}
                 type="text"
-                aria-label="First Name"
-                placeholder="First name"
+                aria-label={dict.signup.firstNameAriaLabel}
+                placeholder={dict.signup.firstNamePlaceholder}
                 disabled={isLoading}
                 className={FIELD_CLASS}
               />
@@ -112,8 +112,8 @@ export default function SignUpForm() {
               <input
                 {...register("lastName")}
                 type="text"
-                aria-label="Last Name"
-                placeholder="Last name"
+                aria-label={dict.signup.lastNameAriaLabel}
+                placeholder={dict.signup.lastNamePlaceholder}
                 disabled={isLoading}
                 className={FIELD_CLASS}
               />
@@ -126,7 +126,7 @@ export default function SignUpForm() {
           <input
             {...register("email")}
             type="email"
-            aria-label="Email"
+            aria-label={dict.signin.emailAriaLabel}
             placeholder="your@email.com"
             disabled={isLoading}
             className={FIELD_CLASS}
@@ -135,7 +135,7 @@ export default function SignUpForm() {
 
           <PasswordInput
             registerProps={register("password")}
-            ariaLabel="Password"
+            ariaLabel={dict.signin.passwordAriaLabel}
             placeholder="••••••••"
             disabled={isLoading}
             autoComplete="new-password"
@@ -149,14 +149,14 @@ export default function SignUpForm() {
             className="mt-1 inline-flex cursor-pointer items-center justify-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-50 active:scale-[0.97] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
           >
             {isLoading && <Spinner />}
-            {isLoading ? "Creating account…" : "Sign up"}
+            {isLoading ? dict.signup.creatingAccount : dict.signup.signUp}
           </button>
         </form>
 
         <p className="mt-6 text-center text-sm text-foreground/60">
-          Already have an account?{" "}
+          {dict.signup.alreadyHaveAccount}{" "}
           <Link href="/auth/signin" className="font-medium text-primary underline-offset-4 hover:underline">
-            Sign in
+            {dict.signup.signInLink}
           </Link>
         </p>
       </div>

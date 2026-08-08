@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import SignInForm from "./components/signin-form";
 import { createServerClient } from "@/utils/supabase/server";
+import { getDictionary } from "@/lib/get-dictionary";
 
 export const metadata: Metadata = {
   title: "Sign In - Template",
@@ -19,5 +20,7 @@ export default async function SignInPage() {
     redirect("/dashboard");
   }
 
-  return <SignInForm />;
+  const { t: dict } = await getDictionary();
+
+  return <SignInForm dict={dict} />;
 }

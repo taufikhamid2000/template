@@ -2,6 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import SignInForm from "@/app/auth/signin/components/signin-form";
+import { en } from "@/lib/dictionaries/en";
 
 // Mock the next/navigation hooks
 const pushMock = jest.fn();
@@ -29,7 +30,7 @@ describe("SignIn Form", () => {
   });
 
   test("renders sign in form with all fields", () => {
-    render(<SignInForm />);
+    render(<SignInForm dict={en} />);
 
     // Check form elements exist
     expect(screen.getByLabelText(/Email/i)).toBeInTheDocument();
@@ -40,7 +41,7 @@ describe("SignIn Form", () => {
   });
 
   test("validates required fields", async () => {
-    render(<SignInForm />);
+    render(<SignInForm dict={en} />);
 
     const user = userEvent.setup();
 
@@ -61,7 +62,7 @@ describe("SignIn Form", () => {
     // Mock the successful sign in response
     signInWithPassword.mockResolvedValueOnce({ error: null });
 
-    render(<SignInForm />);
+    render(<SignInForm dict={en} />);
 
     const user = userEvent.setup();
 
@@ -90,7 +91,7 @@ describe("SignIn Form", () => {
       error: { message: "Invalid login credentials" },
     });
 
-    render(<SignInForm />);
+    render(<SignInForm dict={en} />);
 
     const user = userEvent.setup();
 

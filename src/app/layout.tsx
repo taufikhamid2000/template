@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { cookies } from "next/headers";
 import "./globals.css";
 import { SupabaseListener } from "@/components/supabase-listener";
+import { getDictionary } from "@/lib/get-dictionary";
 import { THEME_COOKIE, isTheme } from "@/lib/theme";
 import {
   ACCENT_COOKIE,
@@ -34,6 +35,7 @@ export default async function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const { locale } = await getDictionary();
   const cookieStore = await cookies();
   const themeCookie = cookieStore.get(THEME_COOKIE)?.value;
   const theme = isTheme(themeCookie) ? themeCookie : "system";
@@ -55,7 +57,7 @@ export default async function RootLayout({
 
   return (
     <html
-      lang="en"
+      lang={locale}
       data-theme={theme === "system" ? undefined : theme}
       data-accent={accent === "default" ? undefined : accent}
       style={customStyle}

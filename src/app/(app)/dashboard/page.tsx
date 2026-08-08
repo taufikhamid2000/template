@@ -1,6 +1,7 @@
 import { Metadata } from "next";
 import { createServerClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
+import { getDictionary } from "@/lib/get-dictionary";
 
 export const metadata: Metadata = {
   title: "Dashboard - Template",
@@ -15,6 +16,8 @@ export default async function DashboardPage() {
   if (!data?.user || error) {
     redirect("/auth/signin");
   }
+
+  const { t: dict } = await getDictionary();
 
   // Get user profile if user exists
   let userProfile = null;
@@ -36,7 +39,7 @@ export default async function DashboardPage() {
       // Create a profile-like object from user metadata
       userProfile = {
         id: data.user.id,
-        first_name: userMetadata?.first_name || "User",
+        first_name: userMetadata?.first_name || dict.dashboard.guest,
         last_name: userMetadata?.last_name || "",
         role: userMetadata?.role || "user",
         email: data.user.email,
@@ -47,57 +50,55 @@ export default async function DashboardPage() {
   return (
     <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-6 px-6 py-12 animate-page-in">
       <h1 className="text-xl font-semibold text-foreground">
-        Welcome, {userProfile?.first_name || "Guest"}!
+        {dict.dashboard.welcome(userProfile?.first_name || dict.dashboard.guest)}
       </h1>{" "}
       <div className="grid gap-6 md:grid-cols-2">
         <div className="rounded-2xl border border-border bg-muted/40 p-6">
-          <h2 className="text-sm font-medium text-foreground/60 mb-4">Your Profile</h2>
+          <h2 className="text-sm font-medium text-foreground/60 mb-4">{dict.dashboard.yourProfile}</h2>
           <div className="space-y-2">
             {userProfile ? (
               <>
                 <p>
-                  <strong>Name:</strong> {userProfile.first_name}{" "}
+                  <strong>{dict.dashboard.name}</strong> {userProfile.first_name}{" "}
                   {userProfile.last_name}
                 </p>
                 <p>
-                  <strong>Email:</strong> {data?.user?.email || "Not available"}
+                  <strong>{dict.dashboard.email}</strong> {data?.user?.email}
                 </p>
                 <p>
-                  <strong>Role:</strong> {userProfile.role || "User"}
+                  <strong>{dict.dashboard.role}</strong> {userProfile.role}
                 </p>
               </>
             ) : (
-              <p>Sign in to view your profile information</p>
+              <p>{dict.dashboard.signInToView}</p>
             )}
           </div>
         </div>
         <div className="rounded-2xl border border-border bg-muted/40 p-6">
-          <h2 className="text-sm font-medium text-foreground/60 mb-4">Quick Actions</h2>
+          <h2 className="text-sm font-medium text-foreground/60 mb-4">{dict.dashboard.quickActions}</h2>
           <div className="space-y-2">
-            <p>
-              This is your personal dashboard. You can customize it with the
-              components you need.
-            </p>
+            <p>{dict.dashboard.quickActionsBody}</p>
           </div>
         </div>{" "}
         {/* Debug information panel - only visible in development */}
         {process.env.NODE_ENV === "development" && (
           <div className="rounded-2xl border border-border bg-muted/40 p-6">
-            <h2 className="text-sm font-medium text-foreground/60 mb-4">Session Debug</h2>
+            <h2 className="text-sm font-medium text-foreground/60 mb-4">{dict.dashboard.sessionDebug}</h2>
             <div className="space-y-2 text-xs font-mono overflow-auto max-h-60 bg-muted p-3 rounded-lg border border-border">
               <div>
-                <strong>Session exists:</strong> {data?.user ? "Yes" : "No"}
+                <strong>{dict.dashboard.sessionExists}</strong>{" "}
+                {data?.user ? dict.dashboard.yes : dict.dashboard.no}
               </div>
               {data?.user && (
                 <>
                   <div>
-                    <strong>User ID:</strong> {data.user.id}
+                    <strong>{dict.dashboard.userId}</strong> {data.user.id}
                   </div>
                   <div>
-                    <strong>Email:</strong> {data.user.email}
+                    <strong>{dict.dashboard.email}</strong> {data.user.email}
                   </div>
                   <div>
-                    <strong>User metadata:</strong>{" "}
+                    <strong>{dict.dashboard.userMetadata}</strong>{" "}
                     <pre>
                       {JSON.stringify(data.user.user_metadata, null, 2)}
                     </pre>

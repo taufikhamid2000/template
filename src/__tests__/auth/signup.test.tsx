@@ -2,6 +2,7 @@ import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import SignUpForm from "@/app/auth/signup/components/signup-form";
+import { en } from "@/lib/dictionaries/en";
 
 // Mock the next/navigation hooks
 const pushMock = jest.fn();
@@ -30,7 +31,7 @@ describe("SignUp Form", () => {
   });
 
   test("renders sign up form with all fields", () => {
-    render(<SignUpForm />);
+    render(<SignUpForm dict={en} />);
 
     // Check form elements exist
     expect(screen.getByLabelText(/First Name/i)).toBeInTheDocument();
@@ -43,7 +44,7 @@ describe("SignUp Form", () => {
   });
 
   test("validates required fields", async () => {
-    render(<SignUpForm />);
+    render(<SignUpForm dict={en} />);
 
     const user = userEvent.setup();
 
@@ -71,7 +72,7 @@ describe("SignUp Form", () => {
     signUp.mockResolvedValueOnce({ error: null });
     signInWithPassword.mockResolvedValueOnce({ error: null });
 
-    render(<SignUpForm />);
+    render(<SignUpForm dict={en} />);
 
     const user = userEvent.setup();
 
@@ -114,7 +115,7 @@ describe("SignUp Form", () => {
       error: { message: "This email is already registered" },
     });
 
-    render(<SignUpForm />);
+    render(<SignUpForm dict={en} />);
 
     const user = userEvent.setup();
 

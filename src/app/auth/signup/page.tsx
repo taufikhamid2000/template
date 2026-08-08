@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 
 import SignUpForm from "./components/signup-form";
 import { createServerClient } from "@/utils/supabase/server";
+import { getDictionary } from "@/lib/get-dictionary";
 
 export const metadata: Metadata = {
   title: "Sign Up - Template",
@@ -17,5 +18,7 @@ export default async function SignUpPage() {
     redirect("/dashboard");
   }
 
-  return <SignUpForm />;
+  const { t: dict } = await getDictionary();
+
+  return <SignUpForm dict={dict} />;
 }

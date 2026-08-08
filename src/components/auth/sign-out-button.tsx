@@ -15,12 +15,16 @@ type SignOutButtonProps = {
     | "ghost"
     | "link";
   className?: string;
+  label?: string;
+  pendingLabel?: string;
 };
 
 export default function SignOutButton({
   redirectTo = "/",
   variant = "ghost",
   className = "hover:text-blue-600",
+  label = "Sign Out",
+  pendingLabel = "Signing out…",
 }: SignOutButtonProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
@@ -49,7 +53,7 @@ export default function SignOutButton({
       className={className}
       disabled={isLoading}
     >
-      {isLoading ? "Signing out..." : "Sign Out"}
+      {isLoading ? pendingLabel : label}
     </Button>
   );
 }

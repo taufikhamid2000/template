@@ -23,6 +23,7 @@ jest.mock("next/navigation", () => ({
 // Import components after mocks
 import SignUpForm from "@/app/auth/signup/components/signup-form";
 import SignInForm from "@/app/auth/signin/components/signin-form";
+import { en } from "@/lib/dictionaries/en";
 
 describe("Authentication Flow", () => {
   beforeEach(() => {
@@ -43,7 +44,7 @@ describe("Authentication Flow", () => {
     signInWithPassword.mockResolvedValueOnce({ error: null });
 
     // Step 3: Render signup form and fill it out
-    const { unmount } = render(<SignUpForm />);
+    const { unmount } = render(<SignUpForm dict={en} />);
     const user = userEvent.setup();
 
     await user.type(screen.getByLabelText(/First Name/i), testUser.firstName);
@@ -75,7 +76,7 @@ describe("Authentication Flow", () => {
     signInWithPassword.mockResolvedValueOnce({ error: null });
 
     // Step 6: Render login form and fill it out
-    render(<SignInForm />);
+    render(<SignInForm dict={en} />);
 
     await user.type(screen.getByLabelText(/Email/i), testUser.email);
     await user.type(screen.getByLabelText("Password"), testUser.password);

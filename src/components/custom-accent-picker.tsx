@@ -26,11 +26,18 @@ export function CustomAccentPicker({
   fg,
   onBgChange,
   onFgChange,
+  dict,
 }: {
   bg: string;
   fg: string;
   onBgChange: (value: string) => void;
   onFgChange: (value: string) => void;
+  dict: {
+    accentCustomLabel: string;
+    accentCustomBg: string;
+    accentCustomFg: string;
+    accentCustomLowContrast: string;
+  };
 }) {
   const ratio = useMemo(() => contrastRatio(bg, fg), [bg, fg]);
   const lowContrast = ratio < 4.5;
@@ -38,9 +45,9 @@ export function CustomAccentPicker({
   return (
     <div className="flex flex-col gap-2 rounded-2xl border border-border bg-muted/40 p-3">
       <div className="flex flex-wrap items-center gap-4">
-        <span className="text-xs font-medium text-foreground/70">Custom colors</span>
+        <span className="text-xs font-medium text-foreground/70">{dict.accentCustomLabel}</span>
         <label className="flex items-center gap-2 text-xs text-foreground/60">
-          Background
+          {dict.accentCustomBg}
           <input
             type="color"
             value={bg}
@@ -49,7 +56,7 @@ export function CustomAccentPicker({
           />
         </label>
         <label className="flex items-center gap-2 text-xs text-foreground/60">
-          Text
+          {dict.accentCustomFg}
           <input
             type="color"
             value={fg}
@@ -59,9 +66,7 @@ export function CustomAccentPicker({
         </label>
       </div>
       {lowContrast && (
-        <p className="text-xs text-amber-700 dark:text-amber-400">
-          Low contrast — this text may be hard to read against this background.
-        </p>
+        <p className="text-xs text-amber-700 dark:text-amber-400">{dict.accentCustomLowContrast}</p>
       )}
     </div>
   );
