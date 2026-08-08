@@ -88,7 +88,7 @@ export function AppShell({ nav, children }: { nav: NavDict; children: React.Reac
           role="dialog"
           aria-modal="true"
           aria-label={nav.brand}
-          className={`fixed top-14 bottom-0 left-0 z-30 flex w-64 flex-col border-r border-[var(--nav-border)] bg-[var(--nav-bg)] px-4 py-4 shadow-xl transition-transform duration-200 md:hidden ${
+          className={`fixed top-14 bottom-0 left-0 z-30 flex w-64 flex-col overflow-y-auto border-r border-[var(--nav-border)] bg-[var(--nav-bg)] px-4 py-4 shadow-xl transition-transform duration-200 md:hidden ${
             open ? "translate-x-0" : "-translate-x-full"
           }`}
         >
@@ -98,7 +98,7 @@ export function AppShell({ nav, children }: { nav: NavDict; children: React.Reac
         </aside>
 
         {/* Desktop sidebar */}
-        <aside className="sticky top-14 hidden h-[calc(100vh-3.5rem)] w-56 shrink-0 flex-col border-r border-[var(--nav-border)] bg-[var(--nav-bg)] px-4 py-6 md:flex">
+        <aside className="sticky top-14 hidden h-[calc(100vh-3.5rem)] w-56 shrink-0 flex-col overflow-y-auto border-r border-[var(--nav-border)] bg-[var(--nav-bg)] px-4 py-6 md:flex">
           <nav className="flex flex-1 flex-col gap-1">
             <NavLinks links={navLinks} pathname={pathname} />
           </nav>
