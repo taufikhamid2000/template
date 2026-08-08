@@ -1,8 +1,18 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { cookies } from "next/headers";
 import "./globals.css";
 import { SupabaseListener } from "@/components/supabase-listener";
-import { ThemeProvider } from "@/components/theme/theme-provider";
+import { THEME_COOKIE, isTheme } from "@/lib/theme";
+import {
+  ACCENT_COOKIE,
+  ACCENT_CUSTOM_BG_COOKIE,
+  ACCENT_CUSTOM_FG_COOKIE,
+  ACCENT_CUSTOM_DEFAULT_BG,
+  ACCENT_CUSTOM_DEFAULT_FG,
+  isAccent,
+  isHexColor,
+} from "@/lib/accent";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -19,13 +29,37 @@ export const metadata: Metadata = {
   description: "A simple Next.js template project with authentication",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const themeCookie = cookieStore.get(THEME_COOKIE)?.value;
+  const theme = isTheme(themeCookie) ? themeCookie : "system";
+  const accentCookie = cookieStore.get(ACCENT_COOKIE)?.value;
+  const accent = isAccent(accentCookie) ? accentCookie : "default";
+
+  // "custom" colors are runtime user input, not a value CSS can express
+  // ahead of time — set as inline custom properties instead of a
+  // :root[data-accent="custom"] block.
+  const customBgCookie = cookieStore.get(ACCENT_CUSTOM_BG_COOKIE)?.value;
+  const customFgCookie = cookieStore.get(ACCENT_CUSTOM_FG_COOKIE)?.value;
+  const customStyle =
+    accent === "custom"
+      ? ({
+          "--nav-bg": isHexColor(customBgCookie) ? customBgCookie : ACCENT_CUSTOM_DEFAULT_BG,
+          "--nav-fg": isHexColor(customFgCookie) ? customFgCookie : ACCENT_CUSTOM_DEFAULT_FG,
+        } as React.CSSProperties)
+      : undefined;
+
   return (
-    <html lang="en" className="dark">
+    <html
+      lang="en"
+      data-theme={theme === "system" ? undefined : theme}
+      data-accent={accent === "default" ? undefined : accent}
+      style={customStyle}
+    >
       <head>
         <meta
           name="viewport"
@@ -35,9 +69,7 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased flex min-h-screen flex-col`}
       >
-        <ThemeProvider>
-          <SupabaseListener>{children}</SupabaseListener>
-        </ThemeProvider>
+        <SupabaseListener>{children}</SupabaseListener>
       </body>
     </html>
   );

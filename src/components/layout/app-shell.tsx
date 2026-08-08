@@ -5,7 +5,10 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import SignOutButton from "@/components/auth/sign-out-button";
 
-const NAV_LINKS = [{ href: "/dashboard", label: "Dashboard" }];
+const NAV_LINKS = [
+  { href: "/dashboard", label: "Dashboard" },
+  { href: "/settings", label: "Settings" },
+];
 
 // Full-width top bar (brand far left, sign-out far right) sits above
 // everything else; the nav links live in a sidebar below it — a static
