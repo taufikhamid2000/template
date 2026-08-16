@@ -27,11 +27,17 @@ export default defineConfig({
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   // Only spin up a local server when testing against localhost — pointing
-  // E2E_BASE_URL at a real deployment skips this entirely.
+  // E2E_BASE_URL at a real deployment skips this entirely. In CI, the
+  // workflow already runs `npm run build` as its own step (so a build
+  // failure is reported clearly on its own, separate from test failures)
+  // — rebuilding again here would be redundant and, worse, gave a second
+  // fresh build a chance to somehow come up without the env it needed
+  // (500s from a broken Supabase client, not a caught build error).
+  // Reusing that same .next output removes that whole class of flake.
   webServer: process.env.E2E_BASE_URL
     ? undefined
     : {
-        command: "npm run build && npm run start",
+        command: process.env.CI ? "npm run start" : "npm run build && npm run start",
         url: "http://localhost:3000",
         reuseExistingServer: !process.env.CI,
         timeout: 180_000,
