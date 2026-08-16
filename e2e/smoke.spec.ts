@@ -37,4 +37,10 @@ test.describe("authenticated pages", () => {
     await expect(page.getByText(/welcome/i)).toBeVisible();
     expect(errors).toEqual([]);
   });
+
+  test("settings loads without a thrown error", async ({ page }) => {
+    const errors = trackErrors(page);
+    await page.goto("/settings");
+    expect(errors).toEqual([]);
+  });
 });
