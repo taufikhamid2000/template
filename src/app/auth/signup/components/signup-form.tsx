@@ -21,7 +21,11 @@ type SignUpFormValues = {
 const FIELD_CLASS =
   "rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring";
 
-export default function SignUpForm({ dict }: { dict: Dictionary }) {
+export default function SignUpForm({
+  dict,
+}: {
+  dict: Pick<Dictionary, "signup" | "signin" | "validation">;
+}) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);

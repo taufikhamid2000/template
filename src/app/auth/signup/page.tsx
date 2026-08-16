@@ -20,5 +20,11 @@ export default async function SignUpPage() {
 
   const { t: dict } = await getDictionary();
 
-  return <SignUpForm dict={dict} />;
+  // Same reasoning as signin/page.tsx — only pass the slices SignUpForm
+  // actually reads (it borrows dict.signin's email/password aria labels),
+  // not the whole dict, which drags dict.dashboard.welcome (a function)
+  // along with it.
+  return (
+    <SignUpForm dict={{ signup: dict.signup, signin: dict.signin, validation: dict.validation }} />
+  );
 }

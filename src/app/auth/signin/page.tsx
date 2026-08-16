@@ -22,5 +22,9 @@ export default async function SignInPage() {
 
   const { t: dict } = await getDictionary();
 
-  return <SignInForm dict={dict} />;
+  // SignInForm is a Client Component — only pass the slices it actually
+  // uses, not the whole dict. dict.dashboard.welcome (a function) can't
+  // cross that boundary as a prop, and passing the entire dict object
+  // drags it along even though this form never reads dashboard at all.
+  return <SignInForm dict={{ signin: dict.signin, validation: dict.validation }} />;
 }
