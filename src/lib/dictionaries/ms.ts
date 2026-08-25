@@ -10,6 +10,11 @@ export const ms: Dictionary = {
     openMenu: "Buka menu",
     closeMenu: "Tutup menu",
   },
+  auth: {
+    tagline: "Lancarkan idea seterusnya dengan lebih pantas.",
+    features: ["Next.js 13+ App Router", "Konfigurasi TypeScript", "Tailwind CSS", "Pengesahan dengan Supabase"],
+    footnote: "Permulaan Next.js + Supabase.",
+  },
   home: {
     title: "Selamat Datang ke Projek Template",
     subtitle: "Permulaan mudah dengan pengesahan",

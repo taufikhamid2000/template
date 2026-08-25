@@ -8,6 +8,13 @@ export const en = {
     openMenu: "Open menu",
     closeMenu: "Close menu",
   },
+  // Shared by the left branding panel on /auth/signin and /auth/signup
+  // (components/auth-branding-panel.tsx).
+  auth: {
+    tagline: "Ship your next idea faster.",
+    features: ["Next.js 13+ App Router", "TypeScript configuration", "Tailwind CSS", "Authentication with Supabase"],
+    footnote: "A Next.js + Supabase starter.",
+  },
   home: {
     title: "Welcome to the Template Project",
     subtitle: "A simple starter with authentication",

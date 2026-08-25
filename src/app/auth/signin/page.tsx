@@ -26,5 +26,11 @@ export default async function SignInPage() {
   // uses, not the whole dict. dict.dashboard.welcome (a function) can't
   // cross that boundary as a prop, and passing the entire dict object
   // drags it along even though this form never reads dashboard at all.
-  return <SignInForm dict={{ signin: dict.signin, validation: dict.validation }} />;
+  return (
+    <SignInForm
+      brand={dict.nav.brand}
+      dict={{ signin: dict.signin, validation: dict.validation }}
+      authDict={dict.auth}
+    />
+  );
 }

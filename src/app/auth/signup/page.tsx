@@ -25,6 +25,10 @@ export default async function SignUpPage() {
   // not the whole dict, which drags dict.dashboard.welcome (a function)
   // along with it.
   return (
-    <SignUpForm dict={{ signup: dict.signup, signin: dict.signin, validation: dict.validation }} />
+    <SignUpForm
+      brand={dict.nav.brand}
+      dict={{ signup: dict.signup, signin: dict.signin, validation: dict.validation }}
+      authDict={dict.auth}
+    />
   );
 }

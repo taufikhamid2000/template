@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import SignOutButton from "@/components/auth/sign-out-button";
+import { LogoMark } from "@/components/logo-mark";
 import type { Dictionary } from "@/lib/dictionaries/en";
 
 type NavDict = Dictionary["nav"];
@@ -62,7 +63,8 @@ export function AppShell({ nav, children }: { nav: NavDict; children: React.Reac
               </svg>
             )}
           </button>
-          <Link href="/dashboard" className="text-sm font-semibold text-[var(--nav-fg)]">
+          <Link href="/dashboard" className="flex items-center gap-1.5 text-sm font-semibold text-[var(--nav-fg)]">
+            <LogoMark size={20} />
             {nav.brand}
           </Link>
         </div>
