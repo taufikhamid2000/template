@@ -202,6 +202,83 @@ everywhere in the app.
 - **Every chart has a legend that IS the accessible view** — not a
   decorative label list, the actual data table alternative to the visual.
 
+## Auth pages (login / signup)
+
+Extracted from DuitDuit's split-screen login/signup. This is the single
+biggest recognition opportunity across the portfolio: it's the first screen
+almost every visitor sees, on every project, and — unlike the rest of the
+app — it isn't about the project's own domain, so there's no reason for it
+to look different from one product to the next. The goal is that someone
+who has seen one of these apps' login pages recognizes the next one as
+*also mine* before reading a word of copy.
+
+**Layout**: split screen on `md:` and up — a `primary`-colored branding
+panel on one side (`md:flex w-[42%] lg:w-[38%]`, hidden below `md:`), the
+form on the other (`flex-1`, `bg-muted`). Below `md:`, the branding panel
+disappears entirely and the form side shows a small logo+wordmark lockup
+(`md:hidden`) linking home, so mobile never loses the brand mark, it just
+loses the marketing copy.
+
+**Branding panel** (left or right, pick one side and keep it the same side
+across every project — don't let it flip project to project):
+- Two oversized soft-edged decorative circles (`rounded-full bg-white/5`,
+  `blur`-free, just low-opacity fills), one bleeding off the top corner,
+  one off the bottom opposite corner — `pointer-events-none`,
+  `overflow-hidden` on the panel.
+- Top: logo mark (an inline SVG monogram/icon, not a raster image — keep it
+  in the "no icon-library dependency" spirit) + wordmark, linking to `/`.
+- Middle: one short, punchy tagline (`text-2xl font-semibold`, project's own
+  voice) + a 3-4 item feature checklist (checkmark SVG + short phrase each,
+  `text-sm`, 80%-opacity foreground-on-primary).
+- Bottom: a footnote line, `text-xs`, ~50%-opacity. This is where the
+  personal signature goes (see below) — every project's footnote ends the
+  same way, only the first clause (the project-specific one-liner) changes.
+
+**The signature**: every branding panel's footnote is
+`"{project-specific one-liner}. A project by Muhammad Taufik →"`, with
+`"Muhammad Taufik"` a real link to the portfolio (`https://taufik.vercel.app`,
+`target="_blank" rel="noopener noreferrer"`), same text size/opacity as the
+rest of the footnote, only picking up an underline on hover/focus. This is
+deliberately small and quiet — a signature in the corner, not a banner —
+but it's the same words in the same place on every project, so it reads as
+one person's mark once someone's seen it twice.
+
+**Form side**: a single `max-w-sm rounded-2xl border border-border
+bg-background p-8 animate-page-in` card, centered. Inside: `text-xl
+font-semibold` title, `text-sm text-foreground/60` subtitle, then the form:
+- Plain `<input>`s styled `rounded-lg border border-border bg-background
+  px-3 py-2 text-sm ... focus-visible:outline focus-visible:outline-2
+  focus-visible:outline-ring` — no custom Field wrapper needed for
+  email/text inputs.
+- Password fields get the shared show/hide toggle pattern (an eye icon
+  button absolutely positioned inside the input's right padding) rather
+  than a second plain input — implement per-stack, but every project's
+  password field behaves the same way.
+- A validation/server error renders as `role="alert"`, `text-sm
+  text-destructive`, tied to the field via `aria-describedby` + the field's
+  own `aria-invalid` — never a bare color change with no accessible
+  announcement.
+- Submit button: full-width-in-card, `rounded-full bg-primary
+  text-primary-foreground`, spinner + relabel while pending
+  ("Log in" → spinner + "Logging in…"), `active:scale-[0.97]` micro-press,
+  disabled + `disabled:opacity-50` while pending. This is the pending-state
+  rule applied to the single most important button in the app.
+- A divider (`"or"` on a hairline) below the form, then any secondary
+  entry path the project has (an OAuth button, a no-account demo/guest
+  path) styled as a quiet outline button, not competing with the primary
+  submit button.
+- A one-line "don't have an account? / already have one?" prompt at the
+  bottom linking to the other auth page.
+
+**What does NOT need to match**: the actual tagline/feature-checklist copy
+(that's the project's own pitch), the primary color (per "tokens are roles,
+not colors" above — each project keeps its own hue), whether OAuth/demo/
+guest paths exist at all, and the exact field set (a project with no
+password recovery flow doesn't need to invent one just for consistency).
+What must match is the skeleton: split layout, panel-left-form-right (or
+consistently the other way — just pick one and never flip it), the
+signature footnote, and the pending/error/accessibility discipline.
+
 ## Adapting this per project
 
 - **Same stack as DuitDuit (Next.js + Tailwind)**: port the CSS variables
