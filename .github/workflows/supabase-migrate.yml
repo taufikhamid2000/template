@@ -1,0 +1,60 @@
+name: Supabase migrations (reusable)
+
+# Called by each project's own .github/workflows/supabase-migrations.yml
+# via:
+#   uses: taufikhamid2000/template/.github/workflows/supabase-migrate.yml@master
+#   secrets: inherit
+#
+# The actual migration-apply steps live here, once, instead of being
+# copy-pasted into every repo that has a supabase/migrations directory.
+#
+# IMPORTANT: applies each file with `supabase db query -f`, never
+# `supabase db push`. Several of these projects (duitduit, jomkomute, ...)
+# share one Supabase project (master_db) but each has its own local
+# migration history. `db push` reconciles migration *history* and can
+# prompt to mark another project's already-applied migrations as
+# "reverted" since it only sees the calling repo's history. `db query -f`
+# runs each file directly against the database without touching that
+# shared history, so it's safe to automate across repos this way.
+# Callers' migrations should be written idempotent (create table/index
+# if not exists, drop policy if exists before create, etc.) so
+# re-running every file on every push, not just new ones, is safe.
+on:
+  workflow_call:
+    secrets:
+      SUPABASE_ACCESS_TOKEN:
+        required: true
+      SUPABASE_PROJECT_REF:
+        required: true
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Link project
+        run: supabase link --project-ref "$SUPABASE_PROJECT_REF"
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+
+      - name: Apply migrations (db query -f, never db push — see header note)
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          files=(supabase/migrations/*.sql)
+          if [ ${#files[@]} -eq 0 ]; then
+            echo "No migration files found under supabase/migrations/ — nothing to do."
+            exit 0
+          fi
+          for f in "${files[@]}"; do
+            echo "Applying $f"
+            supabase db query --linked -f "$f"
+          done
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
