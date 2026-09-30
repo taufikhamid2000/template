@@ -2,7 +2,7 @@ name: Supabase migrations (reusable)
 
 # Called by each project's own .github/workflows/supabase-migrations.yml
 # via:
-#   uses: taufikhamid2000/template/.github/workflows/supabase-migrate.yml@master
+#   uses: taufikhamid2000/template/.github/workflows/supabase-migrate.yml@main
 #   secrets: inherit
 #
 # The actual migration-apply steps live here, once, instead of being
