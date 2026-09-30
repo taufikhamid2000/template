@@ -1,114 +1,11 @@
 import { Metadata } from "next";
-import { createServerClient } from "@/utils/supabase/server";
-import { redirect } from "next/navigation";
-import { getDictionary } from "@/lib/get-dictionary";
 
 export const metadata: Metadata = {
   title: "Dashboard - Template",
   description: "Your dashboard",
 };
 
-export default async function DashboardPage() {
-  const supabase = await createServerClient(); // Get session if available
-  const { data, error } = await supabase.auth.getUser();
-
-  // Redirect to login if no user is found
-  if (!data?.user || error) {
-    redirect("/auth/signin");
-  }
-
-  const { t: dict } = await getDictionary();
-
-  // Get user profile if user exists
-  let userProfile = null;
-  let userMetadata = null;
-
-  if (data?.user) {
-    // Get user metadata directly from user
-    userMetadata = data.user.user_metadata;
-
-    // Try to get profile from the profiles table
-    const profileResponse = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", data.user.id)
-      .single(); // Use profile data if available, otherwise fall back to user metadata
-    if (profileResponse.data) {
-      userProfile = profileResponse.data;
-    } else {
-      // Create a profile-like object from user metadata
-      userProfile = {
-        id: data.user.id,
-        first_name: userMetadata?.first_name || dict.dashboard.guest,
-        last_name: userMetadata?.last_name || "",
-        role: userMetadata?.role || "user",
-        email: data.user.email,
-      };
-    }
-  }
-
-  return (
-    <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-6 px-6 py-12 animate-page-in">
-      <h1 className="text-xl font-semibold text-foreground">
-        {dict.dashboard.welcome(userProfile?.first_name || dict.dashboard.guest)}
-      </h1>{" "}
-      <div className="grid gap-6 md:grid-cols-2">
-        <div className="rounded-2xl border border-border bg-muted/40 p-6">
-          <h2 className="text-sm font-medium text-foreground/60 mb-4">{dict.dashboard.yourProfile}</h2>
-          <div className="space-y-2">
-            {userProfile ? (
-              <>
-                <p>
-                  <strong>{dict.dashboard.name}</strong> {userProfile.first_name}{" "}
-                  {userProfile.last_name}
-                </p>
-                <p>
-                  <strong>{dict.dashboard.email}</strong> {data?.user?.email}
-                </p>
-                <p>
-                  <strong>{dict.dashboard.role}</strong> {userProfile.role}
-                </p>
-              </>
-            ) : (
-              <p>{dict.dashboard.signInToView}</p>
-            )}
-          </div>
-        </div>
-        <div className="rounded-2xl border border-border bg-muted/40 p-6">
-          <h2 className="text-sm font-medium text-foreground/60 mb-4">{dict.dashboard.quickActions}</h2>
-          <div className="space-y-2">
-            <p>{dict.dashboard.quickActionsBody}</p>
-          </div>
-        </div>{" "}
-        {/* Debug information panel - only visible in development */}
-        {process.env.NODE_ENV === "development" && (
-          <div className="rounded-2xl border border-border bg-muted/40 p-6">
-            <h2 className="text-sm font-medium text-foreground/60 mb-4">{dict.dashboard.sessionDebug}</h2>
-            <div className="space-y-2 text-xs font-mono overflow-auto max-h-60 bg-muted p-3 rounded-lg border border-border">
-              <div>
-                <strong>{dict.dashboard.sessionExists}</strong>{" "}
-                {data?.user ? dict.dashboard.yes : dict.dashboard.no}
-              </div>
-              {data?.user && (
-                <>
-                  <div>
-                    <strong>{dict.dashboard.userId}</strong> {data.user.id}
-                  </div>
-                  <div>
-                    <strong>{dict.dashboard.email}</strong> {data.user.email}
-                  </div>
-                  <div>
-                    <strong>{dict.dashboard.userMetadata}</strong>{" "}
-                    <pre>
-                      {JSON.stringify(data.user.user_metadata, null, 2)}
-                    </pre>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
-    </div>
-  );
+// Rendered by <DashboardScreen> from the (app) layout — see layout.tsx.
+export default function DashboardPage() {
+  return null;
 }

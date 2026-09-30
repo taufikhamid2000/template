@@ -5,7 +5,7 @@ authenticated if `E2E_TEST_EMAIL`/`E2E_TEST_PASSWORD` are set (skips cleanly oth
 see `e2e/login.ts`). It fails on any thrown render error or the app's own error boundary.
 It exists to catch bugs `next build`'s type check can't — specifically Server Component ->
 Client Component prop violations (e.g. passing a non-serializable value as a prop), which
-only surface once React actually renders the page. Runs in CI on every push to `master`
+only surface once React actually renders the page. Runs in CI on every push to `main`
 (`.github/workflows/e2e.yml`).
 
 When you add a new page under `src/app`: add its path to `PUBLIC_PAGES` in
@@ -23,17 +23,17 @@ skipped, not failed.
 
 # Git workflow
 
-Solo-maintained repo — push commits directly to `master`, no feature branches or PRs needed.
+Solo-maintained repo — push commits directly to `main`, no feature branches or PRs needed.
 This holds even if a session is scaffolded (e.g. by Claude Code on the web) with a
 designated `claude/...` working branch — the branch isn't something you can avoid
 creating (the launcher sets it up before you get control), so finish the work there,
-push/fast-forward straight to `master` instead of leaving it on the feature branch or
+push/fast-forward straight to `main` instead of leaving it on the feature branch or
 opening a PR, then delete the now-redundant `claude/...` branch from the remote.
 
-Before starting any work, check `git branch --show-current` — if it's not `master`, that's
-a leftover/scaffolded branch, not intentional work to build on top of. Switch to `master`
+Before starting any work, check `git branch --show-current` — if it's not `main`, that's
+a leftover/scaffolded branch, not intentional work to build on top of. Switch to `main`
 and `git pull` to get the latest before making changes, then commit/push straight to
-`master` when done (per above).
+`main` when done (per above).
 
 # Never start the dev server
 
@@ -41,3 +41,17 @@ Do not run `npm run dev` (or any equivalent) yourself, including via the Browser
 preview tools. Rely on `npm run build`/`next build`'s type check and `npm run test:e2e`
 (see above) to verify changes instead. If a change genuinely needs eyes-on browser
 verification, ask the user to run the dev server and check it themselves.
+
+# Single-shell app screens
+
+The authenticated area (`src/app/(app)`) is one shell, not one page per route. The layout
+checks the session and server-renders every screen once (`src/components/screens/*`), then
+passes them to `AppShell` via its `screens` prop, keyed by path. Nav clicks call
+`history.pushState` so switching screens never hits the server; `/dashboard` and
+`/settings` still exist as real URLs (refresh, deep links, back button) but their
+`page.tsx` files render `null`.
+
+When you add an authenticated screen: add a component under `src/components/screens`, add it
+to `screens` in `(app)/layout.tsx`, add its link to `navLinks` and its title to `TITLES`
+in `app-shell.tsx`, keep a `page.tsx` (with `metadata`) at the route, and add the path to
+`e2e/smoke.spec.ts`. Auth pages (`/auth/*`) and `/` stay ordinary routes.

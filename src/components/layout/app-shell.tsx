@@ -15,7 +15,28 @@ type NavDict = Dictionary["nav"];
 // hamburger) below that. Only wraps the authenticated (app) route group —
 // the public home page and auth pages render their own minimal chrome
 // instead, same split DuitDuit uses between its AppShell and /login.
-export function AppShell({ nav, children }: { nav: NavDict; children: React.ReactNode }) {
+//
+// It's also the single shell for those screens: the layout renders every
+// screen on the server once and passes them in via `screens`, keyed by
+// path. Nav clicks call history.pushState (which Next syncs into
+// usePathname) instead of navigating, so switching screens never hits the
+// server. The routes still exist as real URLs for refresh/deep links/back.
+// Keep TITLES in sync with each page's `metadata.title` — pushState doesn't
+// re-run metadata, so the shell sets document.title itself.
+const TITLES: Record<string, string> = {
+  "/dashboard": "Dashboard - Template",
+  "/settings": "Settings - Template",
+};
+
+export function AppShell({
+  nav,
+  screens,
+  children,
+}: {
+  nav: NavDict;
+  screens: Record<string, React.ReactNode>;
+  children?: React.ReactNode;
+}) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
 
@@ -23,6 +44,19 @@ export function AppShell({ nav, children }: { nav: NavDict; children: React.Reac
     { href: "/dashboard", label: nav.dashboard },
     { href: "/settings", label: nav.settings },
   ];
+
+  useEffect(() => {
+    const title = TITLES[pathname];
+    if (title) document.title = title;
+  }, [pathname]);
+
+  // Left-click without modifiers swaps screens in place; anything else
+  // (ctrl/cmd-click, middle-click, ...) falls through to the normal link.
+  function handleNavClick(e: React.MouseEvent<HTMLAnchorElement>, href: string) {
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    e.preventDefault();
+    if (href !== pathname) window.history.pushState(null, "", href);
+  }
 
   useEffect(() => {
     if (!open) return;
@@ -63,7 +97,11 @@ export function AppShell({ nav, children }: { nav: NavDict; children: React.Reac
               </svg>
             )}
           </button>
-          <Link href="/dashboard" className="flex items-center gap-1.5 text-sm font-semibold text-[var(--nav-fg)]">
+          <Link
+            href="/dashboard"
+            onClick={(e) => handleNavClick(e, "/dashboard")}
+            className="flex items-center gap-1.5 text-sm font-semibold text-[var(--nav-fg)]"
+          >
             <LogoMark size={20} />
             {nav.brand}
           </Link>
@@ -95,18 +133,23 @@ export function AppShell({ nav, children }: { nav: NavDict; children: React.Reac
           }`}
         >
           <nav className="flex flex-1 flex-col gap-1">
-            <NavLinks links={navLinks} pathname={pathname} onNavigate={() => setOpen(false)} />
+            <NavLinks
+              links={navLinks}
+              pathname={pathname}
+              onClick={handleNavClick}
+              onNavigate={() => setOpen(false)}
+            />
           </nav>
         </aside>
 
         {/* Desktop sidebar */}
         <aside className="sticky top-14 hidden h-[calc(100vh-3.5rem)] w-56 shrink-0 flex-col overflow-y-auto border-r border-[var(--nav-border)] bg-[var(--nav-bg)] px-4 py-6 md:flex">
           <nav className="flex flex-1 flex-col gap-1">
-            <NavLinks links={navLinks} pathname={pathname} />
+            <NavLinks links={navLinks} pathname={pathname} onClick={handleNavClick} />
           </nav>
         </aside>
 
-        <main className="flex flex-1 flex-col">{children}</main>
+        <main className="flex flex-1 flex-col">{screens[pathname] ?? children}</main>
       </div>
     </div>
   );
@@ -115,10 +158,12 @@ export function AppShell({ nav, children }: { nav: NavDict; children: React.Reac
 function NavLinks({
   links,
   pathname,
+  onClick,
   onNavigate,
 }: {
   links: { href: string; label: string }[];
   pathname: string;
+  onClick: (e: React.MouseEvent<HTMLAnchorElement>, href: string) => void;
   onNavigate?: () => void;
 }) {
   return (
@@ -129,7 +174,10 @@ function NavLinks({
           <Link
             key={link.href}
             href={link.href}
-            onClick={onNavigate}
+            onClick={(e) => {
+              onClick(e, link.href);
+              onNavigate?.();
+            }}
             aria-current={isActive ? "page" : undefined}
             className={
               isActive
