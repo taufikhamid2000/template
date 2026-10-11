@@ -7,6 +7,10 @@ export const en = {
     signingOut: "Signing out…",
     openMenu: "Open menu",
     closeMenu: "Close menu",
+    skipToContent: "Skip to main content",
+    more: "More",
+    hideNumbers: "Hide numbers",
+    showNumbers: "Show numbers",
   },
   // Shared by the left branding panel on /auth/signin and /auth/signup
   // (components/auth-branding-panel.tsx).
@@ -89,8 +93,13 @@ export const en = {
     themeDark: "Dark",
     themeSystem: "System",
     accent: "Accent",
-    accentTooltip:
-      "Recolors the header and sidebar. Page content stays the same regardless of which accent is picked.",
+    accentTooltip: "Recolors the header, sidebar, buttons and focus rings. Page backgrounds stay the same.",
+    interfaceStyle: "Interface style",
+    interfaceClassic: "Classic",
+    interfaceNew: "New",
+    interfaceHint: "New adds a bottom bar on phones and folds secondary content. Add ?ui=classic to any URL to switch back.",
+    bottomBar: "Bottom bar",
+    bottomBarHint: "Pages shown in the phone bottom bar (up to 3). The rest go under More.",
     accentDefault: "Default",
     accentOcean: "Ocean",
     accentForest: "Forest",

@@ -103,27 +103,36 @@
   --ring: #1e40af;
 }
 
-/* Accent presets — header/sidebar/footer chrome only. Fixed colors on
+/* Accent presets — header/sidebar/footer chrome plus --primary/--ring
+ * (buttons, links, focus rings, active icons). Fixed colors on
  * purpose (not theme-aware): each swatch already carries its own white
  * foreground, so it reads fine whether the page itself is light or dark.
  * --nav-fg-muted/border/active-bg/hover-bg derive from --nav-fg at :root
  * above, so only the two base colors need setting here. */
 :root[data-accent="ocean"] {
+  --primary: #1d4ed8;
+  --ring: #1d4ed8;
   --nav-bg: #0b2e59;
   --nav-fg: #ffffff;
 }
 
 :root[data-accent="forest"] {
+  --primary: #047857;
+  --ring: #047857;
   --nav-bg: #0b3d2e;
   --nav-fg: #ffffff;
 }
 
 :root[data-accent="plum"] {
+  --primary: #7e22ce;
+  --ring: #7e22ce;
   --nav-bg: #3b0b59;
   --nav-fg: #ffffff;
 }
 
 :root[data-accent="slate"] {
+  --primary: #475569;
+  --ring: #475569;
   --nav-bg: #1e293b;
   --nav-fg: #ffffff;
 }
@@ -163,4 +172,10 @@ body {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Privacy mode (eye toggle in the header): blur every tagged amount. */
+html[data-privacy="on"] [data-money] {
+  filter: blur(7px);
+  user-select: none;
 }

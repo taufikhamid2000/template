@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import "./globals.css";
 import { SupabaseListener } from "@/components/supabase-listener";
 import { getDictionary } from "@/lib/get-dictionary";
+import { PRIVACY_COOKIE } from "@/lib/privacy";
 import { THEME_COOKIE, isTheme } from "@/lib/theme";
 import {
   ACCENT_COOKIE,
@@ -52,6 +53,9 @@ export default async function RootLayout({
       ? ({
           "--nav-bg": isHexColor(customBgCookie) ? customBgCookie : ACCENT_CUSTOM_DEFAULT_BG,
           "--nav-fg": isHexColor(customFgCookie) ? customFgCookie : ACCENT_CUSTOM_DEFAULT_FG,
+          "--primary": isHexColor(customBgCookie) ? customBgCookie : ACCENT_CUSTOM_DEFAULT_BG,
+          "--primary-foreground": isHexColor(customFgCookie) ? customFgCookie : ACCENT_CUSTOM_DEFAULT_FG,
+          "--ring": isHexColor(customBgCookie) ? customBgCookie : ACCENT_CUSTOM_DEFAULT_BG,
         } as React.CSSProperties)
       : undefined;
 
@@ -59,6 +63,7 @@ export default async function RootLayout({
     <html
       lang={locale}
       data-theme={theme === "system" ? undefined : theme}
+      data-privacy={cookieStore.get(PRIVACY_COOKIE)?.value === "1" ? "on" : undefined}
       data-accent={accent === "default" ? undefined : accent}
       style={customStyle}
     >

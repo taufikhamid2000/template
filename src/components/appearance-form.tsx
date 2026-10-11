@@ -29,9 +29,13 @@ function applyPreview(theme: Theme, accent: AccentId, customBg: string, customFg
   if (accent === "custom") {
     html.style.setProperty("--nav-bg", customBg);
     html.style.setProperty("--nav-fg", customFg);
+    html.style.setProperty("--primary", customBg);
+    html.style.setProperty("--primary-foreground", customFg);
+    html.style.setProperty("--ring", customBg);
   } else {
-    html.style.removeProperty("--nav-bg");
-    html.style.removeProperty("--nav-fg");
+    for (const prop of ["--nav-bg", "--nav-fg", "--primary", "--primary-foreground", "--ring"]) {
+      html.style.removeProperty(prop);
+    }
   }
 }
 

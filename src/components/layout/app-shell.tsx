@@ -3,9 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { Ellipsis, type LucideIcon } from "lucide-react";
 import SignOutButton from "@/components/auth/sign-out-button";
 import { LogoMark } from "@/components/logo-mark";
+import { PrivacyToggle } from "@/components/privacy-toggle";
+import { NAV_PAGES } from "@/lib/nav-pages";
 import type { Dictionary } from "@/lib/dictionaries/en";
+import type { UiStyle } from "@/lib/ui-style";
 
 type NavDict = Dictionary["nav"];
 
@@ -31,19 +35,29 @@ const TITLES: Record<string, string> = {
 export function AppShell({
   nav,
   screens,
+  uiStyle = "classic",
+  privacyOn = false,
+  bottomPageIds,
   children,
 }: {
   nav: NavDict;
+  uiStyle?: UiStyle;
+  privacyOn?: boolean;
+  bottomPageIds?: string[];
   screens: Record<string, React.ReactNode>;
   children?: React.ReactNode;
 }) {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
+  const bottomBar = uiStyle === "new";
 
-  const navLinks = [
-    { href: "/dashboard", label: nav.dashboard },
-    { href: "/settings", label: nav.settings },
-  ];
+  const navLinks = NAV_PAGES.map((page) => ({
+    id: page.id,
+    href: page.href,
+    label: nav[page.id],
+    icon: page.icon,
+  }));
 
   useEffect(() => {
     const title = TITLES[pathname];
@@ -84,7 +98,7 @@ export function AppShell({
             aria-expanded={open}
             aria-label={open ? nav.closeMenu : nav.openMenu}
             onClick={() => setOpen((o) => !o)}
-            className="flex h-11 w-11 cursor-pointer items-center justify-center rounded-lg text-[var(--nav-fg-muted)] transition-colors hover:bg-[var(--nav-hover-bg)] hover:text-[var(--nav-fg)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring md:hidden"
+            className={`h-11 w-11 cursor-pointer items-center justify-center rounded-lg text-[var(--nav-fg-muted)] transition-colors hover:bg-[var(--nav-hover-bg)] hover:text-[var(--nav-fg)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring ${bottomBar ? "hidden" : "flex md:hidden"}`}
           >
             <span className="sr-only">Menu</span>
             {open ? (
@@ -107,12 +121,15 @@ export function AppShell({
           </Link>
         </div>
 
-        <SignOutButton
-          variant="ghost"
-          className="cursor-pointer text-sm text-[var(--nav-fg-muted)] underline-offset-4 transition-colors hover:text-destructive hover:underline"
-          label={nav.signOut}
-          pendingLabel={nav.signingOut}
-        />
+        <div className="flex items-center gap-3">
+          <PrivacyToggle initial={privacyOn} hideLabel={nav.hideNumbers} showLabel={nav.showNumbers} />
+          <SignOutButton
+            variant="ghost"
+            className="cursor-pointer text-sm text-[var(--nav-fg-muted)] underline-offset-4 transition-colors hover:text-destructive hover:underline"
+            label={nav.signOut}
+            pendingLabel={nav.signingOut}
+          />
+        </div>
       </header>
 
       <div className="flex flex-1 flex-col md:flex-row">
@@ -149,8 +166,22 @@ export function AppShell({
           </nav>
         </aside>
 
-        <main className="flex flex-1 flex-col">{screens[pathname] ?? children}</main>
+        <main id="main-content" className={`flex flex-1 flex-col ${bottomBar ? "pb-20 md:pb-0" : ""}`}>
+          {screens[pathname] ?? children}
+        </main>
       </div>
+
+      {bottomBar && (
+        <BottomBar
+          nav={nav}
+          pathname={pathname}
+          links={navLinks}
+          bottomPageIds={bottomPageIds ?? []}
+          moreOpen={moreOpen}
+          setMoreOpen={setMoreOpen}
+          onClick={handleNavClick}
+        />
+      )}
     </div>
   );
 }
@@ -161,7 +192,7 @@ function NavLinks({
   onClick,
   onNavigate,
 }: {
-  links: { href: string; label: string }[];
+  links: NavItem[];
   pathname: string;
   onClick: (e: React.MouseEvent<HTMLAnchorElement>, href: string) => void;
   onNavigate?: () => void;
@@ -170,6 +201,7 @@ function NavLinks({
     <>
       {links.map((link) => {
         const isActive = pathname === link.href;
+        const Icon = link.icon;
         return (
           <Link
             key={link.href}
@@ -181,14 +213,136 @@ function NavLinks({
             aria-current={isActive ? "page" : undefined}
             className={
               isActive
-                ? "flex min-h-11 items-center rounded-lg bg-[var(--nav-active-bg)] px-3 text-sm font-medium text-[var(--nav-fg)]"
-                : "flex min-h-11 items-center rounded-lg px-3 text-sm text-[var(--nav-fg-muted)] transition-colors hover:bg-[var(--nav-hover-bg)] hover:text-[var(--nav-fg)]"
+                ? "flex min-h-11 items-center gap-2.5 rounded-lg bg-[var(--nav-active-bg)] px-3 text-sm font-medium text-[var(--nav-fg)]"
+                : "flex min-h-11 items-center gap-2.5 rounded-lg px-3 text-sm text-[var(--nav-fg-muted)] transition-colors hover:bg-[var(--nav-hover-bg)] hover:text-[var(--nav-fg)]"
             }
           >
+            <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
             {link.label}
           </Link>
         );
       })}
+    </>
+  );
+}
+
+type NavItem = { id: string; href: string; label: string; icon: LucideIcon };
+
+// Phone-only bottom bar for the "new" UI style: the pages picked in
+// Settings (up to three) plus "More" for the rest. The More button only
+// appears when some page isn't in the bar.
+function BottomBar({
+  nav,
+  pathname,
+  links,
+  bottomPageIds,
+  moreOpen,
+  setMoreOpen,
+  onClick,
+}: {
+  nav: NavDict;
+  pathname: string;
+  links: NavItem[];
+  bottomPageIds: string[];
+  moreOpen: boolean;
+  setMoreOpen: (open: boolean) => void;
+  onClick: (e: React.MouseEvent<HTMLAnchorElement>, href: string) => void;
+}) {
+  const primary = bottomPageIds
+    .map((id) => links.find((l) => l.id === id))
+    .filter((l): l is NavItem => !!l);
+  const primaryIds = new Set(primary.map((p) => p.id));
+  const moreLinks = links.filter((l) => !primaryIds.has(l.id));
+  const moreActive = moreLinks.some((l) => l.href === pathname);
+
+  useEffect(() => {
+    if (!moreOpen) return;
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") setMoreOpen(false);
+    }
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, [moreOpen, setMoreOpen]);
+
+  return (
+    <>
+      {moreOpen && (
+        <>
+          <div className="fixed inset-0 z-30 bg-black/40 md:hidden" onClick={() => setMoreOpen(false)} />
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label={nav.more}
+            className="fixed inset-x-0 bottom-16 z-40 max-h-[65vh] overflow-y-auto rounded-t-2xl border-t border-[var(--nav-border)] bg-[var(--nav-bg)] p-3 shadow-xl md:hidden"
+          >
+            <nav className="grid grid-cols-3 gap-2">
+              {moreLinks.map((link) => {
+                const Icon = link.icon;
+                const active = pathname === link.href;
+                return (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    onClick={(e) => {
+                      onClick(e, link.href);
+                      setMoreOpen(false);
+                    }}
+                    aria-current={active ? "page" : undefined}
+                    className={`flex min-h-20 flex-col items-center justify-center gap-1.5 rounded-xl px-1 text-center text-xs ${
+                      active
+                        ? "bg-[var(--nav-active-bg)] font-medium text-[var(--nav-fg)]"
+                        : "text-[var(--nav-fg-muted)] hover:bg-[var(--nav-hover-bg)]"
+                    }`}
+                  >
+                    <Icon className="h-5 w-5" aria-hidden="true" />
+                    {link.label}
+                  </Link>
+                );
+              })}
+            </nav>
+          </div>
+        </>
+      )}
+
+      <nav
+        aria-label={nav.brand}
+        className="fixed inset-x-0 bottom-0 z-40 flex h-16 items-stretch border-t border-[var(--nav-border)] bg-[var(--nav-bg)] backdrop-blur md:hidden"
+      >
+        {primary.map((item) => {
+          const active = pathname === item.href;
+          const Icon = item.icon;
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              aria-current={active ? "page" : undefined}
+              onClick={(e) => {
+                onClick(e, item.href);
+                setMoreOpen(false);
+              }}
+              className={`flex min-h-14 flex-1 flex-col items-center justify-center gap-0.5 text-[11px] ${
+                active ? "font-medium text-primary" : "text-[var(--nav-fg-muted)]"
+              }`}
+            >
+              <Icon className="h-5 w-5" aria-hidden="true" />
+              {item.label}
+            </Link>
+          );
+        })}
+        {moreLinks.length > 0 && (
+          <button
+            type="button"
+            aria-expanded={moreOpen}
+            onClick={() => setMoreOpen(!moreOpen)}
+            className={`flex min-h-14 flex-1 cursor-pointer flex-col items-center justify-center gap-0.5 text-[11px] ${
+              moreOpen || moreActive ? "font-medium text-primary" : "text-[var(--nav-fg-muted)]"
+            }`}
+          >
+            <Ellipsis className="h-5 w-5" aria-hidden="true" />
+            {nav.more}
+          </button>
+        )}
+      </nav>
     </>
   );
 }

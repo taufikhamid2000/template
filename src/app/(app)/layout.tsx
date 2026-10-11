@@ -1,9 +1,13 @@
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { AppShell } from "@/components/layout/app-shell";
 import { DashboardScreen } from "@/components/screens/dashboard-screen";
 import { SettingsScreen } from "@/components/screens/settings-screen";
 import { createServerClient } from "@/utils/supabase/server";
 import { getDictionary } from "@/lib/get-dictionary";
+import { UI_STYLE_COOKIE, parseUiStyle } from "@/lib/ui-style";
+import { BOTTOM_BAR_COOKIE, parseBottomBar } from "@/lib/bottom-bar-prefs";
+import { PRIVACY_COOKIE } from "@/lib/privacy";
 
 // One shell for the whole authenticated app: the session check and both
 // screens are rendered here once, and <AppShell> swaps between them on the
@@ -20,10 +24,14 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   }
 
   const { t } = await getDictionary();
+  const cookieStore = await cookies();
 
   return (
     <AppShell
       nav={t.nav}
+      uiStyle={parseUiStyle(cookieStore.get(UI_STYLE_COOKIE)?.value)}
+      privacyOn={cookieStore.get(PRIVACY_COOKIE)?.value === "1"}
+      bottomPageIds={parseBottomBar(cookieStore.get(BOTTOM_BAR_COOKIE)?.value)}
       screens={{
         "/dashboard": <DashboardScreen user={data.user} />,
         "/settings": <SettingsScreen />,
