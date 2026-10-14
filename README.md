@@ -97,5 +97,32 @@ working ones) and pushes them straight to the named project's Production
 environment via Vercel's REST API — no dashboard clicking. Trigger a redeploy
 afterward for it to take effect.
 
+### Creating a new app from this template (with Claude + connectors)
+
+How JomSookan was spun up end to end. With the GitHub, Supabase and Vercel
+connectors attached to a Claude Code session, no dashboard clicking is needed:
+
+1. **Repo:** create an empty repo on GitHub (the session's GitHub access can't
+   create repos), attach it to the session, then copy this template into it
+   (without `.git`/`node_modules`) and push to `main`.
+2. **Database:** reuse `master_db` with a dedicated schema per app
+   (`create schema <app>`; usage grants; RLS on every table; grants to
+   `authenticated`/`service_role`, none to `anon`). Add the schema to the
+   exposed Data API schemas (`alter role authenticator set pgrst.db_schemas = '…, <app>'`
+   then `notify pgrst, 'reload config'`) and scope the Supabase clients with
+   `db: { schema: "<app>" }`. `auth.users` is shared, so don't add triggers on
+   it — create profiles from an RPC instead. Apply SQL in small chunks (large
+   batches time out); skip `drop policy if exists` on first create, it triggers
+   a confirmation prompt.
+3. **Vercel:** `create_git_project` (`deploy: false`) → `create_project_env`
+   for `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` (from the
+   Supabase connector) and `NEXT_PUBLIC_REDIRECT_URL` → `create_deployment`
+   (`target: production`, `projectSettings.framework: nextjs`,
+   `skipAutoDetectionConfirmation=1`). `vercel.json` already pins `sin1`.
+4. New projects get Vercel's default deployment protection (SSO); turn it off
+   if the app should be public.
+
+This replaces the PowerShell env-var script above for new projects.
+
 ---
 Built by [Muhammad Taufik](https://taufik.vercel.app)
